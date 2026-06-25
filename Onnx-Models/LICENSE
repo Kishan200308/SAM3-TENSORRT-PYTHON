@@ -1,0 +1,11 @@
+---
+license: other
+license_name: meta-sam-3-license
+license_link: https://github.com/facebookresearch/sam3/blob/main/LICENSE
+base_model: facebook/sam3
+tags:
+  - onnx
+  - vision
+  - image-segmentation
+  - sam3
+---

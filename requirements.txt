@@ -1,0 +1,26 @@
+# Tell pip to look for CUDA 12 PyTorch wheels
+--extra-index-url https://download.pytorch.org/whl/cu126
+
+# PyTorch Ecosystem (Check.py, SAM3_PyTorch_To_Onnx.py)
+torch
+torchvision
+
+# Core Machine Learning & GPU Arrays
+cupy-cuda12x          # Keeps TensorRT I/O on the GPU (Inference)
+transformers==5.3.0   # Core SAM3 architecture (Patch/ONNX Export)
+tokenizers            # Text prompt parsing (Inference)
+onnx                  # Model parsing (ONNX Export & Build Engines)
+tabulate              # Terminal formatting (ONNX Export & Inference)
+huggingface_hub       # SAM3 Download from HuggingFace Hub
+
+# UI & Image Utilities
+gradio                # Web interface (UI.py)
+numpy>=2.2.6          # Array handling
+protobuf>=4.25.1      # Required by ONNX underlying architecture
+opencv-python         # Bounding box drawing and image reading (cv2)
+Pillow                # Image resizing (PIL in Inference)
+
+# TensorRT Python Bindings (CUDA 12)
+tensorrt-cu12==10.14.1.48.post1
+tensorrt-dispatch-cu12==10.14.1.48.post1
+tensorrt-lean-cu12==10.14.1.48.post1
