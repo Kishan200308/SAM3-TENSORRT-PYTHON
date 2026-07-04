@@ -2,8 +2,8 @@
 --extra-index-url https://download.pytorch.org/whl/cu126
 
 # PyTorch Ecosystem (Check.py, SAM3_PyTorch_To_Onnx.py)
-torch
-torchvision
+torch>=2.5.0
+torchvision>=0.20.0
 
 # Core Machine Learning & GPU Arrays
 cupy-cuda12x          # Keeps TensorRT I/O on the GPU (Inference)

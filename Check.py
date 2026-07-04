@@ -61,15 +61,8 @@ def audit_system_specs():
             # Some packages use different version attributes
             version = getattr(mod, "__version__", "Found (Version Unknown)")
             
-            # Custom validation for PyTorch GPU Support
-            if pip_name == "torch":
-                if hasattr(mod, "cuda") and mod.cuda.is_available():
-                    print(f"{pip_name.ljust(20)}: ✅ {version} (GPU Enabled)")
-                else:
-                    print(f"{pip_name.ljust(20)}: ❌ {version} (Incompatible! GPU support is disabled/missing)")
-            
-            # Explicit verification for transformers >= 5.3.0
-            elif pip_name == "transformers" and version != "Found (Version Unknown)":
+            # Validation for packages that require specific minimum versions
+            if pip_name in ["torch", "torchvision", "transformers"] and version != "Found (Version Unknown)":
                 try:
                     # Extract version components safely
                     version_numbers = [int(num) for num in re.findall(r'\d+', version)]
@@ -78,15 +71,33 @@ def audit_system_specs():
                         minor = version_numbers[1]
                         patch = version_numbers[2] if len(version_numbers) > 2 else 0
                         
-                        if (major, minor, patch) >= (5, 3, 0):
-                            print(f"{pip_name.ljust(20)}: ✅ {version}")
-                        else:
-                            print(f"{pip_name.ljust(20)}: ❌ {version} (Incompatible! Requires >= 5.3.0)")
+                        if pip_name == "torch":
+                            has_gpu = hasattr(mod, "cuda") and mod.cuda.is_available()
+                            valid_version = (major, minor, patch) >= (2, 5, 0)
+                            
+                            status = "✅" if (has_gpu and valid_version) else "❌"
+                            gpu_text = "(GPU Enabled)" if has_gpu else "(Incompatible! No GPU support)"
+                            ver_text = "" if valid_version else "(Incompatible! Requires >= 2.5.0)"
+                            
+                            print(f"{pip_name.ljust(20)}: {status} {version} {gpu_text} {ver_text}".strip())
+                            
+                        elif pip_name == "torchvision":
+                            if (major, minor, patch) >= (0, 20, 0):
+                                print(f"{pip_name.ljust(20)}: ✅ {version}")
+                            else:
+                                print(f"{pip_name.ljust(20)}: ❌ {version} (Incompatible! Requires >= 0.20.0)")
+
+                        elif pip_name == "transformers":
+                            if (major, minor, patch) >= (5, 3, 0):
+                                print(f"{pip_name.ljust(20)}: ✅ {version}")
+                            else:
+                                print(f"{pip_name.ljust(20)}: ❌ {version} (Incompatible! Requires >= 5.3.0)")
                     else:
                         print(f"{pip_name.ljust(20)}: ⚠️ {version} (Could not parse format for validation)")
                 except Exception:
                     print(f"{pip_name.ljust(20)}: ⚠️ {version} (Validation error)")
             else:
+                # Default output for other packages
                 print(f"{pip_name.ljust(20)}: ✅ {version}")
                 
         except ImportError:
@@ -153,9 +164,15 @@ def audit_system_specs():
         import tensorrt as trt
         trt_python_version = trt.__version__
         
-        # Ensure Python TRT version base matches the CLI version (allows for .post1, etc.)
-        if trtexec_version != "Unknown" and not trt_python_version.startswith(trtexec_version):
-            print(f"TensorRT Version:   ❌ {trt_python_version} (Mismatch! trtexec is {trtexec_version})")
+        # Ensure Python TRT version base matches the CLI version
+        if trtexec_version != "Unknown":
+            base_trtexec = ".".join(trtexec_version.split(".")[:3])
+            base_python = ".".join(trt_python_version.split(".")[:3])
+            
+            if base_python != base_trtexec:
+                print(f"TensorRT Version:   ❌ {trt_python_version} (Mismatch! trtexec is {trtexec_version})")
+            else:
+                print(f"TensorRT Version:   ✅ {trt_python_version}")
         else:
             print(f"TensorRT Version:   ✅ {trt_python_version}")
             
